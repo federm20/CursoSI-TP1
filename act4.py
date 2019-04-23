@@ -16,17 +16,12 @@ class Action(Enum):
     DOWN = 3
 
 
-class Agent:
+# definición del entorno
+class Environment:
 
     def __init__(self):
-        # estado inicial
-        self.state = State.BOTTOM
-
-        # recompenza acumulada
-        self.accumulated_reward = 0
-
-        # define el entorno (current state, action) => (next state, reward)
-        self.environment = {
+        # define el entorno (current state) => [(action) => (next state, reward)]
+        self.definition = {
             State.BOTTOM: {
                 Action.REST: (State.BOTTOM, 0.1),
                 Action.CLIMB: (State.TOP, 0.0)
@@ -40,6 +35,23 @@ class Agent:
                 Action.DOWN: (State.MIDDLE, 0.2)
             }
         }
+
+
+# definición del agente
+class Agent:
+
+    def __init__(self):
+        # estado inicial
+        self.state = State.BOTTOM
+
+        # recompenza acumulada
+        self.accumulated_reward = 0
+
+        # factor de descuento
+        self.gamma = 0.2
+
+        # define el ambiente donde se desarrolla el agnete
+        self.environment = Environment().definition
 
         # muestra el estado actual
         print("Estado inicial: BOTTOM")
@@ -71,12 +83,31 @@ def random_agent():
     # crea el agente
     agent = Agent()
 
-    for i in range(5):
+    for i in range(50):
         actions = agent.get_possible_action()
         random_action = int(np.random.rand() * 2)
         agent.move(actions[random_action])
 
-random_agent()
 
-agent = Agent()
-print(agent.get_possible_action_reward())
+# considera que el agente tiene dos acciones disponibles en cada estado
+def e_random_agent(e):
+    # crea el agente
+    agent = Agent()
+
+    for i in range(5):
+        # obtiene acciones posibles
+        actions = agent.get_possible_action_reward()
+
+        random = np.random.rand()
+
+        # obtiene la accion con minima recompenza
+        if actions[0][1][1] < actions[1][1][1]:
+            min_reward = 0
+        else:
+            min_reward = 1
+
+        agent.move(actions[random_action])
+
+
+# random_agent()
+e_random_agent(0.2)
