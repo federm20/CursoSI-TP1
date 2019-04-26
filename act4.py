@@ -4,16 +4,16 @@ import numpy as np
 
 # posibles estados del agente (espacio de percepciones)
 class State(Enum):
-    BOTTOM = 1
-    MIDDLE = 2
-    TOP = 3
+    BOTTOM = "BOTTOM"
+    MIDDLE = "MIDDLE"
+    TOP = "TOP"
 
 
 # posibles acciones a efectuar por el agente (espacio de acciones)
 class Action(Enum):
-    REST = 1
-    CLIMB = 2
-    DOWN = 3
+    REST = "REST"
+    CLIMB = "CLIMB"
+    DOWN = "DOWN"
 
 
 # definición del entorno
@@ -36,6 +36,24 @@ class Environment:
             }
         }
 
+    # función que retorna las posibles acciones de un determinado estado
+    def get_possible_action(self, state):
+        return list(self.definition[state].keys())
+
+    # función que retorna las posibles acciones de un determinado estado y la recompensa de cada una
+    def get_possible_action_reward(self, state):
+        return list(self.definition[state].items())
+
+    # función que permite al agente moverse (realizar una accion según su estado actual)
+    def execute_action(self, state, action):
+        # controla que la accion se pueda ejecutar en el estado actual
+        if action in list(self.definition[state].keys()):
+            reward = self.definition[state][action][1]
+            observation = self.definition[state][action][0]
+            return [observation, reward]
+        else:
+            return None
+
 
 # definición del agente
 class Agent:
@@ -44,97 +62,113 @@ class Agent:
         # estado inicial
         self.state = State.BOTTOM
 
-        # recompensa acumulada
-        self.accumulated_reward = 0
+        # historia de percepciones recibidas
+        self.perception_history = []
 
-        # factor de descuento
-        self.gamma = 0.2
-
-        # define el ambiente donde se desarrolla el agnete
-        self.environment = Environment().definition
+        # factor de descuento (da mayor o menor peso a las recompensas pasadas)
+        self.gamma = 1
 
         # muestra el estado actual
         print("Estado inicial: BOTTOM")
         print("recompensa acumulada: 0")
 
-    # función que retorna las posibles acciones del estado actual
-    def get_possible_action(self):
-        return list(self.environment[self.state].keys())
-
-    # función que retorna las posibles acciones del estado actual y la recompensa de cada una
-    def get_possible_action_reward(self):
-        return list(self.environment[self.state].items())
-
-    # función que permite al agente moverse en un entorno definido (realizar una accion según su estado actual)
-    def move(self, action):
-        # controla que la accion se pueda ejecutar en el estado actual
-        if action in list(self.environment[self.state].keys()):
-            self.accumulated_reward += self.environment[self.state][action][1]
-            self.state = self.environment[self.state][action][0]
-
+    def move(self, environment, action):
+        perception = environment.execute_action(self.state, action)
+        if perception is not None:
+            observation, reward = perception
+            self.state = observation
+            self.perception_history.append([action, observation, reward])
             print("Acción: {}".format(action))
             print("Estado: {}".format(self.state))
-            print("recompensa acumulada: %.2f" % self.accumulated_reward)
+            print("Recompensa acumulada: %.2f" % self.get_accumulated_reward())
         else:
             print("Movimiento no permitido - Existe un error")
+
+    def get_accumulated_reward(self):
+        sum_reward = 0
+        for k, [_, _, reward] in enumerate(self.perception_history):
+            sum_reward += self.gamma ** k * reward
+        return sum_reward
 
 
 # agente que toma la mejor recompensa instantanea
 def greedy_agent():
     # crea el agente
     agent = Agent()
+    # crea el entorno
+    environment = Environment()
 
     for i in range(50):
         # obtiene las posibles acciones y sus recompensas
-        actions = agent.get_possible_action_reward()
+        actions = environment.get_possible_action_reward(agent.state)
         # revisa cual tiene mejor recompensa
         if actions[0][1][1] < actions[1][1][1]:
-            agent.move(actions[1][0])
+            agent.move(environment, actions[1][0])
         else:
-            agent.move(actions[0][0])
+            agent.move(environment, actions[0][0])
 
 
-# agente que elije la proxima accion aleatoriamente (e-random con e=0.5)
+# agente que elige la proxima accion aleatoriamente (es igual a e-random con e=0.5)
 def random_agent():
     # crea el agente
     agent = Agent()
+    # crea el entorno
+    environment = Environment()
 
     for i in range(50):
         # obtiene las posibles acciones y elige una aleatoriamente
-        actions = agent.get_possible_action()
+        actions = environment.get_possible_action(agent.state)
         random_action = int(np.random.rand() * 2)
-        agent.move(actions[random_action])
+        agent.move(environment, actions[random_action])
 
 
 # agente que elige la proxima accion que menos recompensa tiene con probabilidad e
 def e_random_agent(e):
     # crea el agente
     agent = Agent()
+    # crea el entorno
+    environment = Environment()
 
-    for i in range(5):
+    for i in range(50):
         # obtiene las posibles acciones y sus recompensas
-        actions = agent.get_possible_action_reward()
+        actions = environment.get_possible_action_reward(agent.state)
 
         min_action = 0 if actions[0][1][1] < actions[1][1][1] else 1
 
         # elige la accion con minima recompensa con una probabilidad e
         if np.random.rand() <= e:
-            agent.move(actions[min_action][0])
+            agent.move(environment, actions[min_action][0])
         else:
-            agent.move(actions[1 if min_action == 0 else 0][0])
+            agent.move(environment, actions[1 if min_action == 0 else 0][0])
 
 
-
-def greedy_agent2():
+# agente smart que varia el parametro 'e' segun la cantidad de visitas al estado
+def smart_agent(e):
     # crea el agente
     agent = Agent()
+    # crea el entorno
+    environment = Environment()
+
+    state_counter = {}
+    print(agent.state.name)
+    # state_counter[agent.state] = (1 if state_counter[agent.state] is None else state_counter[agent.state]++)
+
+    print(state_counter)
 
     for i in range(50):
-        actions = agent.get_possible_action()
-        random_action = int(np.random.rand() * 2)
-        agent.move(actions[random_action])
+        # obtiene las posibles acciones y sus recompensas
+        actions = environment.get_possible_action_reward(agent.state)
+
+        min_action = 0 if actions[0][1][1] < actions[1][1][1] else 1
+
+        # elige la accion con minima recompensa con una probabilidad e
+        if np.random.rand() <= e:
+            agent.move(environment, actions[min_action][0])
+        else:
+            agent.move(environment, actions[1 if min_action == 0 else 0][0])
 
 
 # random_agent()
 # greedy_agent()
-e_random_agent(0)
+# e_random_agent(0.2)
+smart_agent(0.2)
