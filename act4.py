@@ -1,6 +1,9 @@
 from enum import Enum
 import numpy as np
 
+# número de iteraciones
+N = 50
+
 
 # posibles estados del agente (espacio de percepciones)
 class State(Enum):
@@ -87,7 +90,7 @@ class Agent:
     def get_accumulated_reward(self):
         sum_reward = 0
         for k, [_, _, reward] in enumerate(self.perception_history):
-            sum_reward += self.gamma ** k * reward
+            sum_reward += (self.gamma ** k) * reward
         return sum_reward
 
 
@@ -98,7 +101,7 @@ def greedy_agent():
     # crea el entorno
     environment = Environment()
 
-    for i in range(50):
+    for i in range(N):
         # obtiene las posibles acciones y sus recompensas
         actions = environment.get_possible_action_reward(agent.state)
         # revisa cual tiene mejor recompensa
@@ -115,7 +118,7 @@ def random_agent():
     # crea el entorno
     environment = Environment()
 
-    for i in range(50):
+    for i in range(N):
         # obtiene las posibles acciones y elige una aleatoriamente
         actions = environment.get_possible_action(agent.state)
         random_action = int(np.random.rand() * 2)
@@ -129,7 +132,7 @@ def e_random_agent(e):
     # crea el entorno
     environment = Environment()
 
-    for i in range(50):
+    for i in range(N):
         # obtiene las posibles acciones y sus recompensas
         actions = environment.get_possible_action_reward(agent.state)
 
@@ -148,27 +151,34 @@ def smart_agent(e):
     agent = Agent()
     # crea el entorno
     environment = Environment()
-
+    # contador de estados para variar probabilidad y agregar inteligencia
     state_counter = {}
-    print(agent.state.name)
-    # state_counter[agent.state] = (1 if state_counter[agent.state] is None else state_counter[agent.state]++)
 
-    print(state_counter)
-
-    for i in range(50):
+    for i in range(N):
         # obtiene las posibles acciones y sus recompensas
         actions = environment.get_possible_action_reward(agent.state)
 
         min_action = 0 if actions[0][1][1] < actions[1][1][1] else 1
 
+        # probabilidad de visitar el estado con menor recompenza inmediata (modificado segun visitas)
+        e_variant = e
+
+        # revisa si existe un contador del estado actual para actualizar la probabilidad e
+        if agent.state.name in state_counter:
+            state_counter[agent.state.name] += 1
+            e_variant = e + (state_counter[agent.state.name] / N)
+        else:
+            state_counter[agent.state.name] = 1
+
         # elige la accion con minima recompensa con una probabilidad e
-        if np.random.rand() <= e:
+        if np.random.rand() <= e_variant:
             agent.move(environment, actions[min_action][0])
         else:
             agent.move(environment, actions[1 if min_action == 0 else 0][0])
 
 
-# random_agent()
-# greedy_agent()
-# e_random_agent(0.2)
+# ejecuta agentes
+random_agent()
+greedy_agent()
+e_random_agent(0.2)
 smart_agent(0.2)

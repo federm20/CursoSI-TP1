@@ -5,19 +5,19 @@ def act1_a1():
     plt.plot(3.5, 5, 5, 8, 6.5, 5, marker='o', c='red')
     plt.plot(4.5, 3, 4, 7, 5.5, 3, 6, 7, marker='o', c='green')
     plt.plot([3.3, 6.7, 5, 3.3], [4.8, 4.8, 8.2, 4.8], c='black')
-    plt.title("Data")
+    plt.title("Dimensión VC Triángulo")
     plt.legend(loc=2)
     plt.show()
 
-def act1_a2():
-    plt.plot(3.5, 5, 5, 8, 6.5, 5, marker='o', c='red')
-    plt.plot(4.5, 3, 4, 7, 5.5, 3, 6, 7, marker='o', c='green')
-    plt.plot([3.3, 6.7, 5, 3.3], [4.8, 4.8, 8.2, 4.8], c='black')
-    plt.title("Data")
-    plt.legend(loc=2)
-    plt.show()
+# def act1_a2():
+#     plt.plot(3.5, 5, 5, 8, 6.5, 5, marker='o', c='red')
+#     plt.plot(4.5, 3, 4, 7, 5.5, 3, 6, 7, marker='o', c='green')
+#     plt.plot([3.3, 6.7, 5, 3.3], [4.8, 4.8, 8.2, 4.8], c='black')
+#     plt.title("Dimensión VC Hiperplano")
+#     plt.legend(loc=2)
+#     plt.show()
 
-# act1_a1()
+act1_a1()
 
 def act1_b():
     # Create data
