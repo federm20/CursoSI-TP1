@@ -17,8 +17,6 @@ def act1_a1():
 #     plt.legend(loc=2)
 #     plt.show()
 
-act1_a1()
-
 def act1_b():
     # Create data
     N = 60
@@ -78,4 +76,7 @@ def act1_b():
 # plt.legend(loc=2)
 # plt.show()
 
+
+# act1_a1()
+act1_b()
 
