@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import axes3d
+
 
 def act1_a1():
     plt.plot(3.5, 5, 5, 8, 6.5, 5, marker='o', c='red')
@@ -9,13 +11,36 @@ def act1_a1():
     plt.legend(loc=2)
     plt.show()
 
-# def act1_a2():
-#     plt.plot(3.5, 5, 5, 8, 6.5, 5, marker='o', c='red')
-#     plt.plot(4.5, 3, 4, 7, 5.5, 3, 6, 7, marker='o', c='green')
-#     plt.plot([3.3, 6.7, 5, 3.3], [4.8, 4.8, 8.2, 4.8], c='black')
-#     plt.title("Dimensión VC Hiperplano")
-#     plt.legend(loc=2)
-#     plt.show()
+
+def act1_a2():
+    fig = plt.figure()
+    ax1 = fig.add_subplot(111, projection='3d')
+
+    ax1.scatter(0,0,6, marker='o', c='red')
+    ax1.scatter(9,9,-12, marker='o', c='red')
+    ax1.scatter(9,9,6, marker='o', c='green')
+    ax1.scatter(0,0,-12, marker='o', c='green')
+
+    normal = np.array([1, 1, 1])
+    point = np.array([1, 2, 3])
+    d = -point.dot(normal)
+
+    # create x,y
+    xx, yy = np.meshgrid(range(10), range(10))
+
+    # calculate corresponding z
+    z = (-normal[0] * xx - normal[1] * yy - d) * 1. / normal[2]
+
+    print(z)
+
+    ax1.plot_wireframe(xx, yy, z)
+
+    # plt.plot(4.5, 3, 4, 7, 5.5, 3, 6, 7, marker='o', c='green')
+    # plt.plot([3.3, 6.7, 5, 3.3], [4.8, 4.8, 8.2, 4.8], c='black')
+    plt.title("Dimensión VC Hiperplano")
+    # plt.legend(loc=2)
+    plt.show()
+
 
 def act1_b():
     # Create data
@@ -78,5 +103,4 @@ def act1_b():
 
 
 # act1_a1()
-act1_b()
-
+act1_a2()
