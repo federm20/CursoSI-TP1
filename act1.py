@@ -52,6 +52,7 @@ def act1_b():
     N = 60
 
     dataset = []
+    testingset = []
     g1 = {'x1': None, 'x2': None, 'y1': None, 'y2': None}
     g2 = {'x1': None, 'x2': None, 'y1': None, 'y2': None}
 
@@ -61,6 +62,11 @@ def act1_b():
 
     for i in range(N):
         dataset.append((0.4 + 0.3 * np.random.rand(), 0.2 + 0.5 * np.random.rand(), "grupo2"))
+
+    # crea 40 datos aleatorios de dos clases diferentes para testing
+    for i in range(20):
+        testingset.append((0.0 + 0.5 * np.random.rand(), np.random.rand(), "grupo1"))
+        testingset.append((0.4 + 0.3 * np.random.rand(), 0.2 + 0.5 * np.random.rand(), "grupo2"))
 
     # mezcla los datos para que no queden las clases separadas
     random.shuffle(dataset)
@@ -102,7 +108,6 @@ def act1_b():
             color = "red"
         ax.scatter(x, y, alpha=0.8, s=30, c=color, edgecolors='none')
 
-
     # obtiene soporte de margen
     margin_x = {'x': None, 'y': None, 'value': 1000}
     margin_y = {'x': None, 'y': None, 'value': 1000}
@@ -110,21 +115,20 @@ def act1_b():
     for x, y, group in dataset:
         if group == "grupo1":
             # calcula el margen de todas las aristas y se queda con la maxima
-            if x < g2['x1'] and margin_x['value'] > abs(x - g2['x1']):
+            if x < g2['x1'] and margin_x['value'] > abs(x - g2['x1']) and g2['y1'] <= y <= g2['y2']:
                 margin_x = {'x': x, 'y': y, 'value': abs(x - g2['x1'])}
-            if x > g2['x2'] and margin_x['value'] > abs(x - g2['x2']):
+            if x > g2['x2'] and margin_x['value'] > abs(x - g2['x2']) and g2['y1'] <= y <= g2['y2']:
                 margin_x = {'x': x, 'y': y, 'value': abs(x - g2['x2'])}
 
-            if y < g2['y1'] and margin_y['value'] > abs(y - g2['y1']):
+            if y < g2['y1'] and margin_y['value'] > abs(y - g2['y1']) and g2['x1'] <= x <= g2['x2']:
                 margin_y = {'x': x, 'y': y, 'value': abs(y - g2['y1'])}
-            if y > g2['y2'] and margin_y['value'] > abs(y - g2['y2']):
+            if y > g2['y2'] and margin_y['value'] > abs(y - g2['y2']) and g2['x1'] <= x <= g2['x2']:
                 margin_y = {'x': x, 'y': y, 'value': abs(y - g2['y2'])}
 
+    print("Punto de soporte horizontal: ", margin_x)
+    print("Punto de soporte vertical: ", margin_y)
 
-
-    print(margin_x)
-    print(margin_y)
-    ax.scatter(margin_x['x'], margin_x['y'], alpha=0.8, s=30, c='black')
+    ax.scatter(margin_x['x'], margin_x['y'], alpha=0.8, s=30, c='blue')
     ax.scatter(margin_y['x'], margin_y['y'], alpha=0.8, s=30, c='blue')
 
     # para este ejemplo de datos un clasificador no esta contenido dentro del otro. En caso de que asi sea, se debe
@@ -141,8 +145,32 @@ def act1_b():
     plt.title("Clasificador rectangular")
     plt.show()
 
+    # predice en la clase de testing y revisa el error
+    plt.subplot()
+    error_count = 0
+    for x, y, grupo in testingset:
+        predict = None
+        color = None
+        if g2['x1'] <= x <= g2['x2'] and g2['y1'] <= y <= g2['y2']:
+            predict = 'grupo2'
+        else:
+            predict = 'grupo1'
+
+        if predict != grupo:
+            error_count += 1
+
+        plt.scatter(x, y, alpha=0.8, s=30, c=['red' if grupo == 'grupo2' else 'green'], edgecolors='none')
+
+    print(error_count)
+    print("Error promedio: ", error_count / 40)
+
+    plt.plot([g2['x1'], g2['x2'], g2['x2'], g2['x1'], g2['x1']], [g2['y1'], g2['y1'], g2['y2'], g2['y2'], g2['y1']],
+             c='black')
+    plt.title("Clasificador rectangular")
+    plt.show()
+
 
 # ejecuta actividades
-# act1_a1()
-# act1_a2()
+act1_a1()
+act1_a2()
 act1_b()
